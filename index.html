@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orbit - Assistente Pessoal de Produtividade & Tarefas</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3Cpath d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Desktop & Drawer -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon" id="logo-icon-placeholder"></div>
+        <div>
+          <span class="logo-text">Orbit</span>
+          <span class="logo-badge">PRO</span>
+        </div>
+      </div>
+
+      <div class="sidebar-add-btn">
+        <button id="sidebar-add-task-btn" class="btn btn-primary" style="width: 100%;">
+          <span id="sidebar-plus-icon"></span>
+          <span>Nova Tarefa</span>
+          <span class="kbd" style="margin-left: auto;">N</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Navegação</div>
+        <button class="nav-item active" data-tab="dashboard">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="dashboard"></span>
+            <span>Dashboard</span>
+          </div>
+        </button>
+        <button class="nav-item" data-tab="tasks">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="checkSquare"></span>
+            <span>Minhas Tarefas</span>
+          </div>
+          <span id="nav-badge-tasks" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-tab="calendar">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="calendar"></span>
+            <span>Minha Agenda</span>
+          </div>
+          <span id="nav-badge-today" class="nav-badge" style="display: none;">0</span>
+        </button>
+        <button class="nav-item" data-tab="kanban">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="kanban"></span>
+            <span>Quadro Kanban</span>
+          </div>
+        </button>
+        <button class="nav-item" data-tab="projects">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="folder"></span>
+            <span>Projetos</span>
+          </div>
+          <span id="nav-badge-projects" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-tab="habits">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="flame"></span>
+            <span>Hábitos & Rotina</span>
+          </div>
+          <span id="nav-badge-habits" class="nav-badge">0</span>
+        </button>
+        <button class="nav-item" data-tab="stats">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="barChart"></span>
+            <span>Estatísticas</span>
+          </div>
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <div class="nav-item-left">
+            <span class="nav-icon" data-icon="settings"></span>
+            <span>Configurações</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="sidebar-quick-search" class="sidebar-search-btn">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span class="nav-icon" data-icon="search"></span>
+            <span>Busca rápida...</span>
+          </span>
+          <span class="kbd">Ctrl+K</span>
+        </button>
+
+        <div id="sidebar-user-card" class="user-snippet" title="Configurações da Conta">
+          <img id="sidebar-user-avatar" src="" alt="Avatar" class="user-avatar">
+          <div style="flex: 1; min-width: 0;">
+            <p id="sidebar-user-name" style="font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+            <p id="sidebar-user-email" style="font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Sticky Header -->
+      <header class="header">
+        <div class="header-left">
+          <button id="mobile-toggle-btn" class="mobile-menu-btn" aria-label="Abrir Menu">
+            <span class="nav-icon" data-icon="menu"></span>
+          </button>
+          <div id="header-search-btn" class="search-input-wrapper">
+            <span class="nav-icon" data-icon="search"></span>
+            <span>Pesquisar tarefas, projetos...</span>
+            <span class="kbd" style="margin-left: auto;">Ctrl+K</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="date-header">
+            <span id="header-date-day" class="date-header-day">Hoje</span>
+            <span id="header-date-sub" class="date-header-sub">0 tarefas</span>
+          </div>
+
+          <button id="theme-toggle-btn" class="theme-btn" title="Alternar Modo Claro / Escuro">
+            <span id="theme-icon"></span>
+          </button>
+
+          <button id="shortcuts-help-btn" class="shortcuts-btn" title="Atalhos de Teclado (Ctrl+/)">
+            <span class="nav-icon" data-icon="help"></span>
+          </button>
+
+          <button id="header-add-task-btn" class="btn btn-primary btn-sm">
+            <span class="nav-icon" data-icon="plus"></span>
+            <span>Criar</span>
+          </button>
+
+          <img id="header-user-avatar" src="" alt="Avatar" class="user-avatar" style="cursor: pointer;">
+        </div>
+      </header>
+
+      <!-- Dynamic Views Container -->
+      <main class="content-area">
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="page-view active">
+          <!-- Welcome Banner -->
+          <div class="welcome-card">
+            <div class="welcome-left">
+              <span id="welcome-date-tag" class="welcome-tag">
+                <span class="nav-icon" data-icon="calendar"></span>
+                <span id="dash-date-str">Hoje</span>
+              </span>
+              <h1 id="welcome-greeting" class="welcome-title">Bom dia, Vitória! 👋</h1>
+              <p id="welcome-subtext" class="welcome-desc">
+                Organize sua rotina, acompanhe seus objetivos e aumente sua produtividade em um só lugar.
+              </p>
+            </div>
+            <div class="welcome-progress-box">
+              <div class="progress-box-header">
+                <span>Progresso do Dia</span>
+                <span id="dash-progress-percent">0%</span>
+              </div>
+              <div style="background: rgba(255, 255, 255, 0.2); height: 8px; border-radius: var(--radius-full); overflow: hidden;">
+                <div id="dash-progress-fill" style="background: #10b981; height: 100%; width: 0%; transition: width 0.4s ease;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 8px; color: #e0e7ff;">
+                <span id="dash-tasks-done-count">0 concluídas</span>
+                <span id="dash-tasks-pending-count">0 pendentes</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card" onclick="App.navigateTo('tasks'); App.setFilter('status', 'today');">
+              <div>
+                <span class="kpi-title">Para Hoje</span>
+                <div id="kpi-today-count" class="kpi-val">0</div>
+                <div class="kpi-sub">atividades agendadas</div>
+              </div>
+              <div class="kpi-icon-box" style="background: var(--primary-light); color: var(--primary);">
+                <span class="nav-icon" data-icon="target"></span>
+              </div>
+            </div>
+
+            <div class="kpi-card" onclick="App.navigateTo('tasks'); App.setFilter('status', 'pending');">
+              <div>
+                <span class="kpi-title">Pendentes</span>
+                <div id="kpi-pending-count" class="kpi-val">0</div>
+                <div class="kpi-sub">em todas as listas</div>
+              </div>
+              <div class="kpi-icon-box" style="background: var(--warning-light); color: var(--warning);">
+                <span class="nav-icon" data-icon="clock"></span>
+              </div>
+            </div>
+
+            <div class="kpi-card" onclick="App.navigateTo('tasks'); App.setFilter('status', 'overdue');">
+              <div>
+                <span class="kpi-title">Atrasadas</span>
+                <div id="kpi-overdue-count" class="kpi-val" style="color: var(--danger);">0</div>
+                <div class="kpi-sub">necessitam atenção</div>
+              </div>
+              <div class="kpi-icon-box" style="background: var(--danger-light); color: var(--danger);">
+                <span class="nav-icon" data-icon="alert"></span>
+              </div>
+            </div>
+
+            <div class="kpi-card" onclick="App.navigateTo('stats');">
+              <div>
+                <span class="kpi-title">Concluídas</span>
+                <div id="kpi-completed-count" class="kpi-val" style="color: var(--success);">0</div>
+                <div class="kpi-sub">tarefas finalizadas</div>
+              </div>
+              <div class="kpi-icon-box" style="background: var(--success-light); color: var(--success);">
+                <span class="nav-icon" data-icon="checkCircle"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Task Input Field -->
+          <div class="quick-input-card">
+            <span class="nav-icon" data-icon="plus" style="color: var(--primary);"></span>
+            <input type="text" id="dash-quick-task-input" class="quick-task-field" placeholder="O que você precisa realizar hoje? Digite aqui e pressione Enter...">
+            <button id="dash-quick-task-submit" class="btn btn-primary btn-sm">Criar Tarefa</button>
+          </div>
+
+          <!-- Today Habits Quick Check-in -->
+          <div class="habit-quick-bar">
+            <div class="section-header-row">
+              <h3 class="section-title">
+                <span class="nav-icon" data-icon="flame" style="color: var(--warning);"></span>
+                <span>Hábitos de Hoje</span>
+              </h3>
+              <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('habits')">Ver todos &rarr;</button>
+            </div>
+            <div id="dash-habits-container" class="habit-quick-grid"></div>
+          </div>
+
+          <!-- Two Columns: Priority Tasks + Agenda Today -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;" class="dash-split-grid">
+            <div>
+              <div class="section-header-row">
+                <h3 class="section-title">Foco Principal & Prioritárias</h3>
+                <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('tasks')">Ver todas &rarr;</button>
+              </div>
+              <div id="dash-priority-tasks-list"></div>
+            </div>
+
+            <div>
+              <div class="section-header-row">
+                <h3 class="section-title">Agenda de Hoje</h3>
+                <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('calendar')">Abrir Agenda</button>
+              </div>
+              <div id="dash-today-schedule-list" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. TASKS VIEW -->
+        <section id="view-tasks" class="page-view">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Minhas Tarefas</h1>
+              <p id="tasks-counter-subtitle" style="font-size: 13px; color: var(--text-muted);"></p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openTaskModal()">
+              <span class="nav-icon" data-icon="plus"></span>
+              <span>Criar Tarefa</span>
+            </button>
+          </div>
+
+          <!-- Quick Add Input -->
+          <div class="quick-input-card">
+            <span class="nav-icon" data-icon="plus" style="color: var(--primary);"></span>
+            <input type="text" id="tasks-quick-input" class="quick-task-field" placeholder="Adicionar tarefa rápida nesta visualização... (Pressione Enter)">
+            <button id="tasks-quick-submit" class="btn btn-primary btn-sm">Criar</button>
+          </div>
+
+          <!-- Filter Controls Bar -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <!-- Search Input -->
+              <div style="display: flex; align-items: center; gap: 8px; background: var(--bg-card-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 6px 12px; flex: 1; min-width: 200px;">
+                <span class="nav-icon" data-icon="search" style="color: var(--text-muted);"></span>
+                <input type="text" id="tasks-search-filter" placeholder="Buscar por título, tag..." style="background: transparent; border: none; outline: none; font-size: 13px; width: 100%; color: var(--text-main);">
+              </div>
+
+              <!-- Status Buttons -->
+              <div style="display: flex; gap: 4px; background: var(--bg-card-subtle); padding: 3px; border-radius: var(--radius-md);">
+                <button class="filter-status-btn active" data-status="all">Todas</button>
+                <button class="filter-status-btn" data-status="pending">Pendentes</button>
+                <button class="filter-status-btn" data-status="completed">Concluídas</button>
+                <button class="filter-status-btn" data-status="overdue">Atrasadas</button>
+              </div>
+
+              <!-- More Filters Toggle -->
+              <button id="toggle-more-filters-btn" class="btn btn-outline btn-sm">
+                <span class="nav-icon" data-icon="sliders"></span>
+                <span>Filtros</span>
+              </button>
+            </div>
+
+            <!-- Dropdown Filters (Hidden by default) -->
+            <div id="tasks-more-filters" style="display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-color); grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <div>
+                <label class="form-label">Prioridade</label>
+                <select id="filter-priority-select" class="form-control">
+                  <option value="all">Todas</option>
+                  <option value="urgent">Urgente</option>
+                  <option value="high">Alta</option>
+                  <option value="medium">Média</option>
+                  <option value="low">Baixa</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Categoria</label>
+                <select id="filter-category-select" class="form-control">
+                  <option value="all">Todas</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Projeto</label>
+                <select id="filter-project-select" class="form-control">
+                  <option value="all">Todos</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Ordenar por</label>
+                <select id="sort-tasks-select" class="form-control">
+                  <option value="dueDate_asc">Prazo mais próximo</option>
+                  <option value="dueDate_desc">Prazo mais distante</option>
+                  <option value="priority_desc">Maior prioridade</option>
+                  <option value="created_desc">Mais recentes</option>
+                  <option value="title_asc">Ordem alfabética (A-Z)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks List Container -->
+          <div id="tasks-list-container"></div>
+        </section>
+
+        <!-- 3. CALENDAR VIEW -->
+        <section id="view-calendar" class="page-view">
+          <div class="calendar-container">
+            <div class="cal-nav-bar">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <h2 id="calendar-header-title" class="cal-month-title">Outubro de 2026</h2>
+                <button class="btn btn-outline btn-sm" onclick="CalendarView.goToToday()">Hoje</button>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="cal-view-modes">
+                  <button class="cal-mode-btn active" data-calmode="month">Mês</button>
+                  <button class="cal-mode-btn" data-calmode="week">Semana</button>
+                  <button class="cal-mode-btn" data-calmode="day">Dia</button>
+                </div>
+
+                <div style="display: flex; gap: 4px;">
+                  <button class="btn btn-outline btn-sm" onclick="CalendarView.prev()">
+                    <span class="nav-icon" data-icon="chevronLeft"></span>
+                  </button>
+                  <button class="btn btn-outline btn-sm" onclick="CalendarView.next()">
+                    <span class="nav-icon" data-icon="chevronRight"></span>
+                  </button>
+                </div>
+
+                <button class="btn btn-primary btn-sm" onclick="App.openTaskModal()">
+                  <span class="nav-icon" data-icon="plus"></span>
+                  <span>Agendar</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Calendar Dynamic Container -->
+            <div id="calendar-render-area"></div>
+          </div>
+        </section>
+
+        <!-- 4. KANBAN VIEW -->
+        <section id="view-kanban" class="page-view">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Quadro Kanban</h1>
+              <p style="font-size: 13px; color: var(--text-muted);">Arraste e solte tarefas entre as colunas para atualizar seu progresso</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openTaskModal()">
+              <span class="nav-icon" data-icon="plus"></span>
+              <span>Nova Tarefa</span>
+            </button>
+          </div>
+
+          <div class="kanban-grid">
+            <!-- To Do Column -->
+            <div class="kanban-col" data-status="todo" ondragover="Kanban.onDragOver(event)" ondragleave="Kanban.onDragLeave(event)" ondrop="Kanban.onDrop(event, 'todo')">
+              <div class="kanban-col-header">
+                <div class="kanban-title-wrap">
+                  <span style="font-weight: 700; font-size: 14px;">A Fazer</span>
+                  <span id="kanban-count-todo" class="kanban-count">0</span>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="App.openTaskModal({ status: 'todo' })">
+                  <span class="nav-icon" data-icon="plus"></span>
+                </button>
+              </div>
+              <div id="kanban-tasks-todo" class="kanban-tasks-list"></div>
+            </div>
+
+            <!-- In Progress Column -->
+            <div class="kanban-col" data-status="in_progress" ondragover="Kanban.onDragOver(event)" ondragleave="Kanban.onDragLeave(event)" ondrop="Kanban.onDrop(event, 'in_progress')">
+              <div class="kanban-col-header">
+                <div class="kanban-title-wrap">
+                  <span style="font-weight: 700; font-size: 14px; color: var(--primary);">Em Andamento</span>
+                  <span id="kanban-count-in_progress" class="kanban-count" style="background: var(--primary-light); color: var(--primary);">0</span>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="App.openTaskModal({ status: 'in_progress' })">
+                  <span class="nav-icon" data-icon="plus"></span>
+                </button>
+              </div>
+              <div id="kanban-tasks-in_progress" class="kanban-tasks-list"></div>
+            </div>
+
+            <!-- Completed Column -->
+            <div class="kanban-col" data-status="completed" ondragover="Kanban.onDragOver(event)" ondragleave="Kanban.onDragLeave(event)" ondrop="Kanban.onDrop(event, 'completed')">
+              <div class="kanban-col-header">
+                <div class="kanban-title-wrap">
+                  <span style="font-weight: 700; font-size: 14px; color: var(--success);">Concluído</span>
+                  <span id="kanban-count-completed" class="kanban-count" style="background: var(--success-light); color: var(--success);">0</span>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="App.openTaskModal({ status: 'completed' })">
+                  <span class="nav-icon" data-icon="plus"></span>
+                </button>
+              </div>
+              <div id="kanban-tasks-completed" class="kanban-tasks-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. PROJECTS VIEW -->
+        <section id="view-projects" class="page-view">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Projetos</h1>
+              <p style="font-size: 13px; color: var(--text-muted);">Agrupe suas tarefas por iniciativas e acompanhe o percentual de entrega</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openProjectModal()">
+              <span class="nav-icon" data-icon="plus"></span>
+              <span>Novo Projeto</span>
+            </button>
+          </div>
+
+          <div id="projects-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;"></div>
+        </section>
+
+        <!-- 6. HABITS VIEW -->
+        <section id="view-habits" class="page-view">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Hábitos & Rotina</h1>
+              <p style="font-size: 13px; color: var(--text-muted);">Construa disciplina diária registrando sua consistência</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openHabitModal()">
+              <span class="nav-icon" data-icon="plus"></span>
+              <span>Novo Hábito</span>
+            </button>
+          </div>
+
+          <div id="habits-list-container"></div>
+        </section>
+
+        <!-- 7. STATS VIEW -->
+        <section id="view-stats" class="page-view">
+          <div class="section-header-row" style="margin-bottom: 20px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Estatísticas de Produtividade</h1>
+              <p style="font-size: 13px; color: var(--text-muted);">Métricas calculadas dinamicamente com base nas suas tarefas reais</p>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;" class="stats-charts-grid">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 20px;">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Evolução da Semana</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Tarefas concluídas vs criadas nos últimos 7 dias</p>
+              <canvas id="chart-weekly" style="width: 100%; height: 240px;"></canvas>
+            </div>
+
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 20px;">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Volume por Prioridade</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Classificação de tarefas por nível de urgência</p>
+              <canvas id="chart-priority" style="width: 100%; height: 240px;"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Progress Distribution -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px;">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Progresso por Categoria</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Onde você está investindo mais tempo e energia</p>
+            <div id="stats-category-bars" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;"></div>
+          </div>
+        </section>
+
+        <!-- 8. SETTINGS VIEW -->
+        <section id="view-settings" class="page-view">
+          <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+            <div>
+              <h1 style="font-family: var(--font-heading); font-size: 22px; font-weight: 800;">Configurações</h1>
+              <p style="font-size: 13px; color: var(--text-muted);">Personalize sua conta, preferências de tema e gerencie seus dados</p>
+            </div>
+
+            <!-- Profile Card -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Perfil do Usuário</h3>
+              <form id="settings-profile-form" style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; gap: 16px; align-items: center;">
+                  <img id="settings-preview-avatar" src="" alt="Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                  <div style="flex: 1;">
+                    <label class="form-label">URL da Foto de Perfil (Avatar)</label>
+                    <input type="url" id="settings-input-avatar" class="form-control" placeholder="https://exemplo.com/foto.jpg">
+                  </div>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" id="settings-input-name" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" id="settings-input-email" class="form-control" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Cargo / Ocupação</label>
+                  <input type="text" id="settings-input-title" class="form-control" placeholder="Ex: Engenheiro de Software">
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                  <button type="submit" class="btn btn-primary btn-sm">Salvar Perfil</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Theme Card -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Aparência & Tema</h3>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <button class="theme-choice-btn" data-theme="light">Modo Claro</button>
+                <button class="theme-choice-btn" data-theme="dark">Modo Escuro</button>
+                <button class="theme-choice-btn" data-theme="system">Automático (Sistema)</button>
+              </div>
+            </div>
+
+            <!-- Categories Card -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 16px; font-weight: 700;">Gerenciar Categorias</h3>
+                <button class="btn btn-primary btn-sm" onclick="App.openCategoryModal()">
+                  <span class="nav-icon" data-icon="plus"></span>
+                  <span>Nova Categoria</span>
+                </button>
+              </div>
+              <div id="settings-categories-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;"></div>
+            </div>
+
+            <!-- Backup & Restore Card -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Backup & Dados (Offline First)</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                <button class="btn btn-outline" onclick="App.exportBackup()">
+                  <span class="nav-icon" data-icon="download"></span>
+                  <span>Exportar Backup JSON</span>
+                </button>
+                <label class="btn btn-outline" style="cursor: pointer;">
+                  <span class="nav-icon" data-icon="upload"></span>
+                  <span>Importar Backup JSON</span>
+                  <input type="file" id="import-json-input" accept=".json" style="display: none;" onchange="App.importBackup(event)">
+                </label>
+                <button class="btn btn-outline" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);" onclick="App.resetToDefaults()">
+                  <span class="nav-icon" data-icon="rotate"></span>
+                  <span>Restaurar Demonstração</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav class="mobile-nav">
+        <button class="mobile-nav-item active" data-tab="dashboard">
+          <span class="nav-icon" data-icon="dashboard"></span>
+          <span>Início</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="tasks">
+          <span class="nav-icon" data-icon="checkSquare"></span>
+          <span>Tarefas</span>
+        </button>
+        <button class="mobile-fab-btn" onclick="App.openTaskModal()" aria-label="Nova Tarefa">
+          <span class="nav-icon" data-icon="plus"></span>
+        </button>
+        <button class="mobile-nav-item" data-tab="calendar">
+          <span class="nav-icon" data-icon="calendar"></span>
+          <span>Agenda</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="kanban">
+          <span class="nav-icon" data-icon="kanban"></span>
+          <span>Kanban</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Task Modal (Create & Edit) -->
+  <div id="modal-task" class="modal-overlay">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 id="modal-task-title" class="modal-title">Nova Tarefa</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <form id="form-task">
+        <div class="modal-body">
+          <input type="hidden" id="task-id-field">
+
+          <div class="form-group">
+            <label class="form-label">Título da Tarefa <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="task-title-input" class="form-control" placeholder="Ex: Apresentar proposta de arquitetura..." required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descrição (Opcional)</label>
+            <textarea id="task-desc-input" class="form-control" rows="2" placeholder="Notas, orientações ou links..."></textarea>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Data de Vencimento</label>
+              <input type="date" id="task-date-input" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Horário (Opcional)</label>
+              <input type="time" id="task-time-input" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Prioridade</label>
+            <div class="priority-selector-grid">
+              <button type="button" class="priority-btn" data-priority="low">Baixa</button>
+              <button type="button" class="priority-btn active" data-priority="medium">Média</button>
+              <button type="button" class="priority-btn" data-priority="high">Alta</button>
+              <button type="button" class="priority-btn" data-priority="urgent">Urgente</button>
+            </div>
+            <input type="hidden" id="task-priority-value" value="medium">
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Categoria</label>
+              <select id="task-category-select" class="form-control"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Projeto (Opcional)</label>
+              <select id="task-project-select" class="form-control">
+                <option value="">Nenhum projeto</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subtasks Checklist Section -->
+          <div class="form-group">
+            <label class="form-label">Subtarefas / Checklist</label>
+            <div class="subtasks-manager">
+              <div id="subtasks-list-modal" class="subtasks-list"></div>
+              <div class="subtask-add-row">
+                <input type="text" id="new-subtask-text" class="form-control" placeholder="Adicionar item ao checklist... (Pressione Enter)" style="padding: 6px 10px; font-size: 12px;">
+                <button type="button" id="btn-add-subtask" class="btn btn-secondary btn-sm">Adicionar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Etiquetas / Tags (separadas por vírgula)</label>
+            <input type="text" id="task-tags-input" class="form-control" placeholder="ex: Urgente, Q4, FrontEnd">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-task">Salvar Tarefa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Project Modal -->
+  <div id="modal-project" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-project-title" class="modal-title">Novo Projeto</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <form id="form-project">
+        <div class="modal-body">
+          <input type="hidden" id="project-id-field">
+          <div class="form-group">
+            <label class="form-label">Nome do Projeto <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="project-name-input" class="form-control" placeholder="Ex: Lançamento do Produto..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição (Opcional)</label>
+            <textarea id="project-desc-input" class="form-control" rows="2" placeholder="Objetivo geral desta iniciativa..."></textarea>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Cor de Identificação</label>
+              <input type="color" id="project-color-input" class="form-control" value="#6366f1" style="height: 42px; padding: 2px;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prazo Final (Opcional)</label>
+              <input type="date" id="project-deadline-input" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Projeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Habit Modal -->
+  <div id="modal-habit" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-habit-title" class="modal-title">Novo Hábito</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <form id="form-habit">
+        <div class="modal-body">
+          <input type="hidden" id="habit-id-field">
+          <div class="form-group">
+            <label class="form-label">Nome do Hábito <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="habit-title-input" class="form-control" placeholder="Ex: Beber 2L de água, Meditar..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição / Motivação</label>
+            <input type="text" id="habit-desc-input" class="form-control" placeholder="Ex: Todos os dias após o café da manhã">
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Cor</label>
+              <input type="color" id="habit-color-input" class="form-control" value="#06b6d4" style="height: 42px; padding: 2px;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Frequência</label>
+              <select id="habit-frequency-select" class="form-control">
+                <option value="daily">Diário</option>
+                <option value="weekly">Semanal</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Hábito</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Category Modal -->
+  <div id="modal-category" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-category-title" class="modal-title">Nova Categoria</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <form id="form-category">
+        <div class="modal-body">
+          <input type="hidden" id="category-id-field">
+          <div class="form-group">
+            <label class="form-label">Nome da Categoria <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="category-name-input" class="form-control" placeholder="Ex: Trabalho, Estudos, Pessoal..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição (Opcional)</label>
+            <input type="text" id="category-desc-input" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cor de Destaque</label>
+            <input type="color" id="category-color-input" class="form-control" value="#6366f1" style="height: 42px; padding: 2px;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Categoria</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Global Search Modal (Ctrl+K) -->
+  <div id="modal-search" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px;">
+        <span class="nav-icon" data-icon="search" style="color: var(--primary);"></span>
+        <input type="text" id="global-search-input" placeholder="Digite para buscar tarefas, projetos ou categorias..." style="background: transparent; border: none; outline: none; font-size: 14px; width: 100%; color: var(--text-main);">
+        <span class="kbd">ESC</span>
+      </div>
+      <div id="global-search-results" style="max-height: 380px; overflow-y: auto; padding: 12px;"></div>
+    </div>
+  </div>
+
+  <!-- 6. Keyboard Shortcuts Modal -->
+  <div id="modal-shortcuts" class="modal-overlay">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Atalhos de Teclado</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <div class="modal-body" style="gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm); font-size: 13px;">
+          <span>Busca Rápida</span>
+          <span class="kbd">Ctrl + K</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm); font-size: 13px;">
+          <span>Criar Nova Tarefa</span>
+          <span class="kbd">N</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm); font-size: 13px;">
+          <span>Menu de Atalhos</span>
+          <span class="kbd">Ctrl + /</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-card-subtle); border-radius: var(--radius-sm); font-size: 13px;">
+          <span>Fechar Modais</span>
+          <span class="kbd">ESC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Confirm Delete Dialog -->
+  <div id="modal-confirm" class="modal-overlay">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <h3 id="modal-confirm-title" class="modal-title" style="color: var(--danger);">Excluir Registro</h3>
+        <button class="btn-ghost" onclick="App.closeModals()">
+          <span class="nav-icon" data-icon="close"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-confirm-msg" style="font-size: 13px; color: var(--text-secondary);"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModals()">Cancelar</button>
+        <button id="btn-confirm-delete-action" class="btn btn-danger">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/icons.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
